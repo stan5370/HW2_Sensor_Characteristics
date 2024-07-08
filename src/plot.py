@@ -1,4 +1,3 @@
-import rawpy
 import numpy as np
 import glob
 import cv2
@@ -36,8 +35,26 @@ def plot_input_histogram(imgs,sensitivity):
         imgs(np.ndarray): 3-dimensional array containing one image per intensity setting (not all the 200)
     
     """
-    raise NotImplementedError
-        
+    num_sensitivities = len(sensitivity)
+    num_cols = (num_sensitivities + 1) // 2  # Calculate the number of columns for two rows
+    fig, axes = plt.subplots(2, num_cols, sharey=True)
+    
+    for i in range(num_sensitivities):
+        row = i // num_cols
+        col = i % num_cols
+        ax = axes[row, col]
+        ax.hist(imgs[:, :, i].ravel(), bins=100, alpha=0.5, range=(0, 254))
+        ax.set_title(f'Sensitivity {sensitivity[i]}')
+        ax.set_xlabel('Intensity')
+        if col == 0:
+            ax.set_ylabel('Count')
+        ax.grid(True)
+    
+    # Hide any unused subplots
+    for j in range(num_sensitivities, 2 * num_cols):
+        fig.delaxes(axes[j // num_cols, j % num_cols])
+    
+
 def plot_histograms_channels(img,sensitivity):
     """
     
@@ -48,8 +65,21 @@ def plot_histograms_channels(img,sensitivity):
         sensitivity(float): The gain settings of the img series
     
     """
+    channel_titles = ['Red Channel', 'Green Channel', 'Blue Channel']
+    channel_colors = ['red', 'green', 'blue']
     
-    raise NotImplementedError
+    fig, axes = plt.subplots(1, 3, sharey=True)
+    
+    for i in range(3):
+        ax = axes[i]
+        ax.hist(img[:, :, i].ravel(), bins=100, color=channel_colors[i], alpha=0.5, range=(0, 255))
+        ax.set_title(channel_titles[i])
+        ax.set_xlabel('Intensity')
+        if i == 0:
+            ax.set_ylabel('Count')
+        ax.grid(True)
+    
+    fig.suptitle(f'Sensitivity {sensitivity}', fontsize=16)
         
 def plot_input_images(imgs,sensitivity):
     """
@@ -64,10 +94,38 @@ def plot_input_images(imgs,sensitivity):
         sensitivity(np.ndarray): The sensitivy (gain) vector for the image database
     
     """
-    raise NotImplementedError
+    num_sensitivities = len(sensitivity)
+    num_cols = (num_sensitivities + 1) // 2  # Calculate the number of columns for two rows
+    fig, axes = plt.subplots(2, num_cols, figsize=(15, 10))
+    
+    for i in range(num_sensitivities):
+        row = i // num_cols
+        col = i % num_cols
+        ax = axes[row, col]
+        plt.sca(ax)  # Set the current axis
+        # Select the first image for each sensitivity
+        image_data = imgs[:, :, i]
+        plot_with_colorbar(image_data, vmax=255)
+        ax.set_title(f'Sensitivity {sensitivity[i]}')
+        ax.axis('off')
+    
+    # Hide any unused subplots
+    for j in range(num_sensitivities, 2 * num_cols):
+        fig.delaxes(axes[j // num_cols, j % num_cols])
+    
 
 def plot_rgb_channel(img, sensitivity):
-    raise NotImplementedError
+    fig, axes = plt.subplots(1, 3)
+    channel_titles = ['Red Channel', 'Green Channel', 'Blue Channel']
+    channel_colors = ['Reds', 'Greens', 'Blues']
+    
+    for i in range(3):
+        ax = axes[i]
+        ax.imshow(img[:, :, i], cmap=channel_colors[i])
+        ax.set_title(channel_titles[i])
+        ax.axis('off')
+    
+    fig.suptitle(f'Sensitivity {sensitivity}', fontsize=16)
 
 def plot_images(data, sensitivity, statistic,color_channel):
     """

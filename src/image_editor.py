@@ -23,7 +23,7 @@ def crop(imgs, xDimMin, xDimMax, yDimMin, yDimMax):
     returns:
         images (np.ndarray): cropped version of all the images
     """
-    raise NotImplementedError
+    return imgs[xDimMin:xDimMax, yDimMin:yDimMax, :, :]
 
 def channel_filter(imgs):
     """
@@ -54,4 +54,19 @@ def channel_filter(imgs):
         filteredImages(np.ndarray): filtered version of the image, whose dimensions are 
         (X,Y, RGB, timestamp of image)
     """
-    raise NotImplementedError
+    # Extract the dimensions of the input images
+    height, width, num_images, num_sensitivities = imgs.shape
+    
+    # Initialize arrays to store the filtered channels
+    red_channel = imgs[0:height:2, 0:width:2, :, :]  # Red channel
+    green_channel1 = imgs[0:height:2, 1:width:2, :, :]  # Green channel 1
+    green_channel2 = imgs[1:height:2, 0:width:2, :, :]  # Green channel 2
+    blue_channel = imgs[1:height:2, 1:width:2, :, :]  # Blue channel
+    
+    # Combine the two green channels
+    green_channel = (green_channel1 + green_channel2) / 2
+    
+    # Stack the channels along a new axis to create the filtered images
+    filtered_images = np.stack((red_channel, green_channel, blue_channel), axis=2)
+    
+    return filtered_images
