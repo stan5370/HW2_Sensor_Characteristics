@@ -145,7 +145,19 @@ def plot_images(data, sensitivity, statistic,color_channel):
         void, but show the plots!
 
     """
-    raise NotImplementedError
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fig.suptitle(f'{statistic.capitalize()} Images for {["Red", "Green", "Blue"][color_channel]} Channel')
+
+    color_maps = ['Reds', 'Greens', 'Blues']
+    
+    for i, sens in enumerate(sensitivity):
+        im = axes[i].imshow(data[:, :, i], cmap=color_maps[color_channel])
+        axes[i].set_title(f'Sensitivity: {sens}')
+        axes[i].axis('off')
+        plt.colorbar(im, ax=axes[i], fraction=0.046, pad=0.04)
+
+    plt.tight_layout()
+    plt.show()
     
     
 def plot_relations(means, variances, skip_pixel, sensitivity, color_idx):

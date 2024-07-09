@@ -26,7 +26,24 @@ def plot_overlayed_hist(data,loc,sensitivity,size):
     output:
         void, but you should plot the graphs! hint: try looking at plt.hist
     """
-    raise NotImplementedError
+
+    y, x = loc
+    h, w = size
+    
+    plt.figure(figsize=(10, 6))
+    
+    for i, sens in enumerate(sensitivity):
+        pixel_values = data[y:y+h, x:x+w, :, :, i].flatten()
+        
+        plt.hist(pixel_values, bins=50, density=True, alpha=0.8, ec="k", 
+                 label=f'Sensitivity: {sens}')
+    
+    plt.xlabel('Pixel Intensity')
+    plt.ylabel('Probability Density')
+    plt.title('Histogram of Pixel Intensities for Different Sensitivity Settings')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
 
 def get_pixel_location(img_shape,N_x,N_y):
     """
@@ -56,4 +73,24 @@ def get_pixel_location(img_shape,N_x,N_y):
     Output:
     
     """
-    raise NotImplementedError
+    height, width = img_shape[:2]
+    
+    # Calculate the step size
+    x_step = width / (N_x + 1)
+    y_step = height / (N_y + 1)
+    
+    # Calculate equally spaced points, excluding boundaries
+    x_points = (np.arange(1, N_x + 1) * x_step)
+    y_points = (np.arange(1, N_y + 1) * y_step)
+    
+    # Create 2D grid coordinates
+    X, Y = np.meshgrid(x_points, y_points)
+    
+    # Round and cast to integer values
+    X = np.round(X).astype(np.uint16)
+    Y = np.round(Y).astype(np.uint16)
+    
+    X = X.T
+    Y = Y.T
+    
+    return X, Y

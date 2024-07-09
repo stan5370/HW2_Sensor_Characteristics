@@ -17,7 +17,10 @@ def calc_mean(imgs):
         mean_imgs(np.ndarray): the mean value of images in relation to their bayer pattern
         filters. size should be (x dimension * y dimension * r g b)
     """
-    raise NotImplementedError
+    mean_imgs = np.mean(imgs, axis=3)
+    
+    # Return the mean value, which should have the shape (H, W, #colors, #sensitivity)
+    return mean_imgs
     
 
 def calc_var(imgs):
@@ -31,7 +34,11 @@ def calc_var(imgs):
         filters. size should be (x dimension * y dimension * r g b)
     """
 
-    raise NotImplementedError
+    var_imgs = np.var(imgs, axis=3)
+    
+    # Return the variance value, which should have the shape (H, W, #colors, #sensitivity)
+    return var_imgs
+
 
 def fit_linear_polynom_to_variance_mean(mean, var,th=200):
     """
