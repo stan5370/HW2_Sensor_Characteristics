@@ -39,23 +39,15 @@ def load_data(folder,numImages=200,height=600,width=800):
     returns:
         imgs (np.array): The 200 images as monochromatic images in uint8 type format
     """
-    path = os.path.join('pic//HW2_data//', folder)
-    raw_files = glob.glob(os.path.join(path, '*.Raw'))
-    
-
-    # Ensure we don't try to load more images than available
-    numImages = min(numImages, len(raw_files))
-    print(numImages)
-
-    # Initialize an empty array to store the images
-    imgs = np.empty((height, width, numImages), dtype=np.uint8)
-
-    for i in range(numImages):
-        with open(raw_files[i], 'rb') as file:
-            img = np.fromfile(file, dtype=np.uint8)
-            img = img.reshape((height, width))
-            imgs[:, :, i] = img
-
+    imgs = []
+    folder = 'pic//HW2_Data//' + folder
+    #print(folder)
+    for path in glob.glob(folder + '/*.Raw'):
+        image = np.fromfile(path, dtype=np.uint8, sep="")
+        image = np.reshape(image, (600, 800))
+        #image = convert_uint16_to_uint8(image)
+        imgs.append(image)
+    imgs = np.transpose(np.array(imgs), (1, 2, 0))
     return imgs
 
 def load_dataset():
@@ -72,23 +64,12 @@ def load_dataset():
         sensitivy (np.array): A numpy array containing [0,1,3,9,14,18]
     
     """
-    sensitivities = [0, 1, 3, 9, 14, 18]
-    numImages = 200
-    height = 600
-    width = 800
-
-    # Initialize empty arrays to store the data
-    dark = np.empty((height, width, numImages, len(sensitivities)), dtype=np.uint8)
-    imgs = np.empty((height, width, numImages, len(sensitivities)), dtype=np.uint8)
-
-    # Load data for each sensitivity
-    for idx, sensitivity in enumerate(sensitivities):
-        dark_folder = f'dark{sensitivity}'
-        white_folder = f'gain{sensitivity}'
-
-        dark[:, :, :, idx] = load_data(dark_folder, numImages, height, width)
-        imgs[:, :, :, idx] = load_data(white_folder, numImages, height, width)
-
-    sensitivity_array = np.array(sensitivities)
-
-    return dark, imgs, sensitivity_array
+    # Test that one folder can be read succesfully
+    test = load_data('dark0')
+    dark = np.zeros(test.shape + (6,),dtype=np.uint8)
+    imgs = np.zeros(test.shape + (6,),dtype=np.uint8)
+    sensitivity = [0,1,3,9,14,18]
+    for k in range(6):
+        dark[:,:,:,k] = load_data('dark' + str(sensitivity[k]))
+        imgs[:,:,:,k] = load_data('gain' + str(sensitivity[k]))
+    return dark, imgs, sensitivity

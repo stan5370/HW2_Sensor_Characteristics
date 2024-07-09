@@ -52,8 +52,29 @@ def fit_linear_polynom_to_variance_mean(mean, var,th=200):
           gain(nd.array): the slope of the polynomial fit. Should be of shape (Num_channel,Num_gain) for our data
           delta(nd.array): the y-intercept of the polynomial fit. Should be of shape (Num_channel,Num_gain) for our data
     """
+    num_channels = mean.shape[2]
+    num_gains = mean.shape[3]
     
-    raise NotImplementedError
+    gain = np.zeros((num_channels, num_gains))
+    delta = np.zeros((num_channels, num_gains))
+    
+    for c in range(num_channels):
+        for g in range(num_gains):
+            mean_values = mean[:, :, c, g].ravel()
+            var_values = var[:, :, c, g].ravel()
+            
+            # Filter out low mean values
+            valid_indices = mean_values < th
+            mean_filtered = mean_values[valid_indices]
+            var_filtered = var_values[valid_indices]
+            
+            # Fit a linear polynomial (degree 1)
+            p = np.polyfit(mean_filtered, var_filtered, 1)
+            
+            gain[c, g] = p[0]  # Slope
+            delta[c, g] = p[1]  # Intercept
+    
+    return gain, delta
 
 def fit_linear_polynom_to_read_noise(delta, gain):
     """
@@ -67,8 +88,19 @@ def fit_linear_polynom_to_read_noise(delta, gain):
           sigma_read(np.ndarray): the slope of the linear fit - #(Num_Channel)
           sigma_ADC(np.ndarray): the y-intercept of the linear fit - #(Num_Channel)
     """
+    num_channels = delta.shape[0]
     
-    raise NotImplementedError
+    sigma_read = np.zeros(num_channels)
+    sigma_ADC = np.zeros(num_channels)
+    
+    for c in range(num_channels):
+        # Fit a linear polynomial (degree 1)
+        p = np.polyfit(gain[c, :], delta[c, :], 1)
+        
+        sigma_read[c] = p[0]  # Slope
+        sigma_ADC[c] = p[1]  # Intercept
+    
+    return sigma_read, sigma_ADC
     
     
 def calc_SNR_for_specific_gain(mean,var):
@@ -82,5 +114,18 @@ def calc_SNR_for_specific_gain(mean,var):
     output:
           SNR(np.ndarray): the computed SNR vs. mean of the captured image dataset - #(255, Num_gain)
     """
+    SNR = np.zeros(255)  # Initialize SNR array for mean values in the range [0, 255]
     
-    raise NotImplementedError
+    mean_values = mean.ravel()
+    var_values = var.ravel()
+    stddev_values = np.sqrt(var_values)
+    
+    for i in range(255):
+        # Find indices where mean values fall into the bin [i, i+1)
+        indices = (mean_values >= i) & (mean_values < i + 1)
+        if np.any(indices):
+            mean_bin = mean_values[indices]
+            stddev_bin = stddev_values[indices]
+            SNR[i] = np.mean(mean_bin) / np.mean(stddev_bin)
+    
+    return SNR

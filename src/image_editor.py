@@ -64,7 +64,7 @@ def channel_filter(imgs):
     blue_channel = imgs[1:height:2, 1:width:2, :, :]  # Blue channel
     
     # Combine the two green channels
-    green_channel = (green_channel1 + green_channel2) / 2
+    green_channel = green_channel2
     
     # Stack the channels along a new axis to create the filtered images
     filtered_images = np.stack((red_channel, green_channel, blue_channel), axis=2)

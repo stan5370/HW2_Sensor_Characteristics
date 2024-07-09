@@ -127,7 +127,7 @@ def plot_rgb_channel(img, sensitivity):
     
     fig.suptitle(f'Sensitivity {sensitivity}', fontsize=16)
 
-def plot_images(data, sensitivity, statistic,color_channel):
+def plot_images(data, sensitivity, statistic, color_channel):
     """
     this function should plot all 3 filters of your data, given a
     statistic (either mean or variance in this case!)
@@ -145,13 +145,14 @@ def plot_images(data, sensitivity, statistic,color_channel):
         void, but show the plots!
 
     """
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fig, axes = plt.subplots(1, 6, figsize=(15, 5))
     fig.suptitle(f'{statistic.capitalize()} Images for {["Red", "Green", "Blue"][color_channel]} Channel')
 
     color_maps = ['Reds', 'Greens', 'Blues']
+
     
     for i, sens in enumerate(sensitivity):
-        im = axes[i].imshow(data[:, :, i], cmap=color_maps[color_channel])
+        im = axes[i].imshow(data[:, :, color_channel, i], cmap=color_maps[color_channel])
         axes[i].set_title(f'Sensitivity: {sens}')
         axes[i].axis('off')
         plt.colorbar(im, ax=axes[i], fraction=0.046, pad=0.04)
@@ -175,8 +176,24 @@ def plot_relations(means, variances, skip_pixel, sensitivity, color_idx):
 
     returns:
         void, but show plots!
-    """
-    raise NotImplementedError
+    """    
+    colors = ['red', 'green', 'blue']
+    color = colors[color_idx]
+    
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    
+    for i in range(6):
+        ax = axes[i // 3, i % 3]
+        mean_values = means[::skip_pixel, ::skip_pixel, color_idx, i].ravel()
+        variance_values = variances[::skip_pixel, ::skip_pixel, color_idx, i].ravel()
+        ax.scatter(mean_values, variance_values, color=color, alpha=0.5)
+        ax.set_title(f'Sensitivity {sensitivity[i]}')
+        ax.set_xlabel('Mean')
+        ax.set_ylabel('Variance')
+        ax.grid(True)
+    
+    plt.tight_layout()
+    plt.show()
         
 def plot_mean_variance_with_linear_fit(gain,delta,means,variances,skip_points=50,color_channel=0):
     """
@@ -200,7 +217,32 @@ def plot_mean_variance_with_linear_fit(gain,delta,means,variances,skip_points=50
     returns:
         void, but show plots!
     """
-    raise NotImplementedError
+    num_gains = means.shape[3]
+    colors = ['red', 'green', 'blue']
+    color = colors[color_channel]
+    
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    
+    for i in range(num_gains):
+        ax = axes[i // 3, i % 3]
+        mean_values = means[::skip_points, ::skip_points, color_channel, i].ravel()
+        variance_values = variances[::skip_points, ::skip_points, color_channel, i].ravel()
+        
+        # Scatter plot of the data
+        ax.scatter(mean_values, variance_values, color=color, alpha=0.5, label='Data')
+        
+        # Linear fit line
+        fit_line = gain[color_channel, i] * mean_values + delta[color_channel, i]
+        ax.plot(mean_values, fit_line, color='black', linestyle='--', label='Linear Fit')
+        
+        ax.set_title(f'Sensitivity {i}')
+        ax.set_xlabel('Mean')
+        ax.set_ylabel('Variance')
+        ax.grid(True)
+        ax.legend()
+    
+    plt.tight_layout()
+    plt.show()
     
 def plot_read_noise_fit(sigma_read, sigma_ADC, gain, delta, color_channel=0):
     """
@@ -220,5 +262,23 @@ def plot_read_noise_fit(sigma_read, sigma_ADC, gain, delta, color_channel=0):
     returns:
         void, but show plots!
     """
+    colors = ['red', 'green', 'blue']
+    color = colors[color_channel]
     
-    raise NotImplementedError
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Scatter plot of the data
+    ax.scatter(gain[color_channel, :], delta[color_channel, :], color=color, alpha=0.5, label='Data')
+    
+    # Linear fit line
+    fit_line = sigma_read[color_channel] * gain[color_channel, :] + sigma_ADC[color_channel]
+    ax.plot(gain[color_channel, :], fit_line, color='black', linestyle='--', label='Linear Fit')
+    
+    ax.set_title(f'Read Noise vs. Gain for {color.capitalize()} Channel')
+    ax.set_xlabel('Gain')
+    ax.set_ylabel('Read Noise (Delta)')
+    ax.grid(True)
+    ax.legend()
+    
+    plt.tight_layout()
+    plt.show()
