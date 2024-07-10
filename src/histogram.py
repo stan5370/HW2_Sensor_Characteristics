@@ -30,8 +30,6 @@ def plot_overlayed_hist(data,loc,sensitivity,size):
     y, x = loc
     h, w = size
     
-    plt.figure(figsize=(10, 6))
-    
     for i, sens in enumerate(sensitivity):
         pixel_values = data[y:y+h, x:x+w, :, :, i].flatten()
         
@@ -40,10 +38,8 @@ def plot_overlayed_hist(data,loc,sensitivity,size):
     
     plt.xlabel('Pixel Intensity')
     plt.ylabel('Probability Density')
-    plt.title('Histogram of Pixel Intensities for Different Sensitivity Settings')
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.show()
 
 def get_pixel_location(img_shape,N_x,N_y):
     """
